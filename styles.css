@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+:root{
+    --bg:#f7fafc; /* gray-50 */
+    --card:#ffffff;
+    --muted:#6b7280;
+    --accent:#2563eb; /* blue-600 */
+    --accent-2:#4f46e5;
+    --success:#16a34a;
+    --danger:#dc2626;
+    --glass: rgba(255,255,255,0.7);
+}
+html,body{height:100%;}
+body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); color: #0f172a; }
+
+/* App container centralizado */
+#app{max-width:1200px;margin:0 auto;padding:1.25rem 1rem;}
+
+/* Tarjetas / paneles */
+.card, .panel { background: var(--card); border-radius: 12px; box-shadow: 0 6px 18px rgba(15,23,42,0.06); padding:1rem; border: 1px solid rgba(15,23,42,0.04); }
+.panel-lg { padding:1.5rem; }
+
+/* Encabezados */
+h1, .h1 { font-size:1.75rem; font-weight:800; color: #0f172a; }
+h2, .h2 { font-size:1.25rem; font-weight:700; color:#0b1220; }
+h3, .h3 { font-size:1.05rem; font-weight:600; color:#0b1220; }
+
+/* Botones más consistentes */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; border-radius:8px; padding:0.5rem 0.75rem; font-weight:600; cursor:pointer; border:1px solid transparent; transition:all .12s ease; }
+.btn:active{transform:translateY(1px)}
+.btn-primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; box-shadow: 0 6px 18px rgba(79,70,229,0.12); }
+.btn-primary:hover{filter:brightness(.98);}
+.btn-ghost { background:transparent; color:var(--accent); border:1px solid rgba(37,99,235,0.08); }
+.btn-danger { background:var(--danger); color:white; }
+.btn-sm { padding:0.25rem .5rem; font-size:0.875rem; border-radius:6px }
+
+/* Inputs y selects coherentes */
+input[type='text'], input[type='email'], input[type='number'], select, textarea { width:100%; padding:.6rem .75rem; border-radius:8px; border:1px solid rgba(15,23,42,0.08); background:linear-gradient(180deg, rgba(255,255,255,1), rgba(250,250,250,1)); outline:none; transition: box-shadow .12s ease, border-color .12s ease; }
+input:focus, select:focus, textarea:focus { box-shadow: 0 4px 14px rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.18); }
+
+/* Table styling */
+table { width:100%; border-collapse:collapse; font-size:0.95rem; }
+thead th { background: linear-gradient(180deg,#f8fafc,#eef2ff); font-weight:700; color:#111827; padding:12px; text-align:left; border-bottom:1px solid rgba(15,23,42,0.06); }
+tbody td { padding:12px; border-bottom:1px solid rgba(15,23,42,0.04); }
+tbody tr:hover td { background: rgba(15,23,42,0.02); }
+.table-muted { color:var(--muted); }
+
+/* Modal tweaks */
+#message-modal .card { max-width:520px; }
+
+/* Small utilidades */
+.muted { color:var(--muted); }
+.kpi { display:flex; flex-direction:column; gap:.25rem }
+.kpi .value { font-weight:800; font-size:1.25rem }
+
+/* Print styles (extendidas y mejoradas) */
+@page { size: A4; margin: 18mm; }
+@media print {
+    /* Ocultar elementos de navegación y gestión */
+    .no-print { display: none !important; }
+    /* Asegurar que el contenido del reporte use todo el ancho */
+    .print-area { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+    /* Quitar sombras, bordes y fondos de color para ahorrar tinta y mejorar legibilidad */
+    body, .bg-gray-50, .bg-white { background-color: #fff !important; color: #000 !important; }
+    .shadow-lg, .rounded-xl, .border, .card { box-shadow: none !important; border: none !important; }
+    /* Mejorar la tabla para impresión */
+    table { width: 100%; border-collapse: collapse; }
+    thead { display: table-header-group; }
+    th, td { border: 1px solid #ccc; padding: 6px; }
+    h1, h2, h3 { color: #000 !important; }
+    tr, .card { page-break-inside: avoid; }
+    .page-break { page-break-before: always; }
+    /* Elementos pensados solo para impresión */
+    .print-only { display:block !important; }
+}
+
+/* Small responsive adjustments */
+@media (min-width:768px){ #app{padding:2rem;} }
+
+/* Backwards compatibility classes used in templates */
+.rounded-lg { border-radius:12px; }
+.shadow-sm { box-shadow: 0 4px 12px rgba(2,6,23,0.06); }
+

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes Financieros | Mockup</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración para usar la fuente Inter -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app" class="p-4 sm:p-8">
+        <!-- Contenido principal cargado por JS -->
+    </div>
+
+    <!-- Modal de Mensaje (Reemplazo de alert()) -->
+    <div id="message-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-60 flex items-center justify-center z-50">
+        <div class="card max-w-sm w-full">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800">Mensaje</h3>
+            <p id="modal-content" class="text-gray-600 mb-6"></p>
+            <button onclick="document.getElementById('message-modal').classList.add('hidden')" class="btn btn-primary w-full">Cerrar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const SUPABASE_URL = 'https://xbiftfevjfelixsbzqku.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiaWZ0ZmV2amZlbGl4c2J6cWt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMTI1ODEsImV4cCI6MjA3NzU4ODU4MX0.69KR1rrSDxWUqiaYoiyX3b5icsvH0yPEjZQOJ0aJymI'
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        // ejemplo sencillo
+        window.supabase = supabase
+        console.log('Supabase inicializado')
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
