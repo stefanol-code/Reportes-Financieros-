@@ -79,4 +79,264 @@ tbody tr:hover td { background: rgba(15,23,42,0.02); }
 /* Backwards compatibility classes used in templates */
 .rounded-lg { border-radius:12px; }
 .shadow-sm { box-shadow: 0 4px 12px rgba(2,6,23,0.06); }
+/* ===== Auth V2 overrides (llamativo y profesional) ===== */
+/* This block intentionally overrides previous auth styles to provide a modern hero + glass card look. */
+.auth-root { max-width: 980px; margin: 2.25rem auto; position:relative; }
+.auth-root::before,
+.auth-root::after { content: ''; position: absolute; border-radius: 50%; filter: blur(60px); opacity: .9; z-index: 0; pointer-events: none; }
+.auth-root::before { width: 420px; height: 420px; left: -80px; top: -60px; background: linear-gradient(135deg, rgba(107,140,255,0.35), rgba(139,87,214,0.32)); }
+.auth-root::after { width: 320px; height: 320px; right: -60px; bottom: -80px; background: linear-gradient(135deg, rgba(37,99,235,0.22), rgba(16,185,129,0.18)); }
+.auth-container { position: relative; display: flex; border-radius: 18px; overflow: visible; background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(248,250,255,0.7)); box-shadow: 0 20px 60px rgba(16,24,40,0.12); border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(6px); }
+.auth-panel { display:flex; width:100%; min-height: 460px; }
+.auth-panels-wrapper { display:flex; width:100%; transition: transform .6s cubic-bezier(.22,.9,.2,1); transform: translateX(0); }
+.auth-left, .auth-right { box-sizing:border-box; width:50%; padding:32px; display:flex; align-items:center; }
+.auth-left { flex-direction:column; justify-content:center; gap:18px; background: linear-gradient(180deg,#2b2f60 0%, #3e4a7a 100%); color: #fff; position:relative; }
+.auth-left .logo { width:96px; height:96px; border-radius:18px; box-shadow: 0 12px 40px rgba(0,0,0,0.28); border: 3px solid rgba(255,255,255,0.08); }
+.auth-left h2 { font-size:28px; margin:0; font-weight:900; letter-spacing: -0.02em; }
+.auth-left p { color: rgba(255,255,255,0.92); max-width:360px; text-align:center; font-size:15px; }
+.auth-left .cta-btn { border: none; background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06)); color:#fff; padding:12px 20px; border-radius:12px; font-weight:800; box-shadow: 0 8px 26px rgba(0,0,0,0.18); cursor:pointer; transition: transform .18s ease, box-shadow .18s ease; }
+.auth-left .cta-btn:hover { transform:translateY(-3px); box-shadow: 0 18px 46px rgba(0,0,0,0.22); }
+.auth-right { justify-content:center; }
+.auth-card { width:92%; max-width:520px; background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,250,252,0.96)); border-radius:14px; padding:28px; box-shadow: 0 20px 50px rgba(16,24,40,0.08); border:1px solid rgba(15,23,42,0.06); position:relative; z-index:5; }
+.auth-title { font-size:26px; font-weight:900; color:#081225; margin-bottom:6px; }
+.auth-sub { color:var(--muted); margin-bottom:16px; }
+.form-field { margin-bottom:12px; position:relative; }
+.input { width:100%; padding:14px 16px; border-radius:12px; border:1px solid rgba(15,23,42,0.06); background: linear-gradient(180deg,#fff,#fbfdff); outline:none; transition: box-shadow .14s ease, transform .08s ease; }
+.input:focus { box-shadow: 0 18px 40px rgba(79,70,229,0.06); transform: translateY(-2px); border-color: rgba(79,70,229,0.18); }
+.input-icon { position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--muted); }
+.btn-primary-large { display:inline-block; width:100%; padding:14px 18px; border-radius:12px; background: linear-gradient(90deg, #4f46e5, #06b6d4); color:#fff; font-weight:800; letter-spacing:.6px; box-shadow: 0 16px 40px rgba(79,70,229,0.18); border:none; cursor:pointer; transition: transform .12s ease, box-shadow .12s ease; }
+.btn-primary-large:hover { transform: translateY(-3px); box-shadow: 0 26px 60px rgba(79,70,229,0.22); }
+.muted-center { text-align:center; color:var(--muted); margin:12px 0; }
+.link-button { background:transparent; border:none; color:#374151; font-weight:700; padding:10px; border-radius:8px; cursor:pointer; }
+.panel-switch { position:relative; height:360px; }
+.panel-switch > div { position:absolute; left:0; top:0; width:100%; height:100%; padding:6px 12px; box-sizing:border-box; transition: opacity .26s ease, transform .26s ease; display:flex; flex-direction:column; justify-content:center; }
+.panel-hidden { opacity:0; transform:translateX(8px) scale(.995); pointer-events:none; z-index:1; }
+.panel-visible { opacity:1; transform:translateX(0) scale(1); pointer-events:auto; z-index:3; }
+.auth-card::after { content: ''; position:absolute; inset:0; border-radius:14px; pointer-events:none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); }
+.auth-card .muted-center .link-button { color:#6b7280; }
+.auth-container.swap .auth-panels-wrapper { transform: translateX(-50%); }
+.auth-container.swap .auth-left .cta-btn { order: 3; }
+.auth-container.swap .register-switch { display:none !important; }
+@media (max-width: 900px) {
+    .auth-root { max-width: 100%; padding: 8px; }
+    .auth-panel { flex-direction:column-reverse; }
+    .auth-left, .auth-right { width:100%; padding:18px; }
+    .auth-left { min-height: 140px; order:1; }
+    .panel-switch { height:auto; }
+    .panel-switch > div { position:relative; opacity:1; transform:none; height:auto; }
+    .auth-card { width:100%; padding:18px; }
+}
+
+/* Hover & click (active) micro-interactions for buttons and links */
+:root{
+    --m-purple: #4f46e5; /* color de la M (oscuro) */
+    --m-teal: #06b6d4;   /* color de la M (acento) */
+}
+
+.btn-primary-large, .cta-btn {
+    transition: transform .16s cubic-bezier(.2,.9,.2,1), box-shadow .16s ease, filter .12s ease;
+    will-change: transform;
+}
+
+.btn-primary-large:hover {
+    transform: translateY(-4px) scale(1.03);
+    filter: brightness(1.03);
+    box-shadow: 0 30px 60px rgba(79,70,229,0.18), 0 6px 18px rgba(6,182,212,0.06);
+}
+.btn-primary-large:active {
+    transform: translateY(1px) scale(.995);
+    box-shadow: 0 10px 28px rgba(79,70,229,0.12);
+}
+
+.cta-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 20px 46px rgba(79,70,229,0.12);
+}
+.cta-btn:active { transform: translateY(1px) scale(.995); }
+
+/* Link button hover uses the purple accent from the logo, with a subtle light sweep */
+.link-button {
+    transition: color .12s ease, transform .12s ease, text-shadow .12s ease;
+}
+.link-button:hover {
+    color: var(--m-purple);
+    transform: translateY(-2px);
+    text-shadow: 0 6px 18px rgba(79,70,229,0.08);
+}
+.link-button:active { transform: translateY(1px); }
+
+/* Focus accessibility */
+.btn-primary-large:focus, .cta-btn:focus, .link-button:focus { outline: 3px solid rgba(79,70,229,0.12); outline-offset: 2px; }
+
+/* Small visual accent: a light sheen when hovering primary buttons */
+.btn-primary-large::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0; border-radius: 12px;
+    pointer-events: none; opacity: 0; transition: opacity .22s ease, transform .22s ease;
+}
+.btn-primary-large:hover::after { opacity: .06; transform: translateY(-6px); background: linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05)); }
+
+/* Ensure positioned parent for ::after on buttons */
+.btn-primary-large, .cta-btn { position: relative; }
+
+/* ===== Auth Dark Theme Overrides (applies when login is visible) ===== */
+/* These rules are appended to switch the auth UI to a dark, purple-themed presentation. */
+.auth-root { min-height: 100vh; display:flex; align-items:center; justify-content:center; margin:0 auto; padding:48px 20px; }
+.auth-root::before, .auth-root::after { filter: blur(120px); opacity: .9; }
+.auth-root::before { background: radial-gradient(circle at 20% 10%, rgba(99,102,241,0.32), rgba(79,70,229,0.14) 40%, transparent 60%); left:-160px; top:-120px; width:720px; height:720px; }
+.auth-root::after { background: radial-gradient(circle at 85% 90%, rgba(139,87,214,0.26), rgba(99,102,241,0.12) 40%, transparent 65%); right:-120px; bottom:-120px; width:520px; height:520px; }
+
+.auth-root .auth-container { background: linear-gradient(180deg, rgba(6,8,16,0.72), rgba(10,12,25,0.7)); border: 1px solid rgba(99,102,241,0.06); box-shadow: 0 40px 110px rgba(2,6,23,0.7); }
+.auth-root .auth-left { background: linear-gradient(180deg,#070919 0%, #0d1220 100%); }
+.auth-root .auth-left h2, .auth-root .auth-left p { color: #f5f7ff; }
+.auth-root .auth-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(99,102,241,0.06); box-shadow: 0 30px 80px rgba(3,6,23,0.64); }
+.auth-root .auth-title { color: #fff; }
+.auth-root .auth-sub { color: rgba(203,213,225,0.66); }
+.auth-root .input { background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); color: #eef2ff; }
+.auth-root .input::placeholder { color: rgba(203,213,225,0.36); }
+.auth-root .link-button { color: rgba(203,213,225,0.86); }
+
+/* stronger purple accents on hover using M colors */
+.auth-root .btn-primary-large { background: linear-gradient(90deg, #6d57f4, #7b61ff); box-shadow: 0 30px 80px rgba(107,90,240,0.16); }
+.auth-root .btn-primary-large:hover { box-shadow: 0 46px 110px rgba(107,90,240,0.28), 0 8px 30px rgba(91,33,182,0.08); transform: translateY(-4px) scale(1.03); }
+
+/* subtle entrance animation for the auth card */
+.auth-root .auth-card { transform: translateY(6px); opacity: 0; animation: authCardIn .6s cubic-bezier(.2,.9,.25,1) .08s forwards; }
+@keyframes authCardIn { to { transform: translateY(0); opacity:1; } }
+
+/* Ensure links remain visible on dark */
+.auth-root .auth-card .muted-center .link-button { color: #cbd5e1; }
+
+@media (max-width: 900px) {
+    .auth-root { padding:28px 12px; }
+    .auth-root::before, .auth-root::after { display:none; }
+    .auth-panel { min-height: auto; }
+    .auth-root .auth-card { animation: none; opacity:1; transform:none; }
+}
+
+/* ===== Admin Dark Morna Theme ===== */
+.admin-root { max-width:1200px; margin:28px auto; padding:28px; background: transparent; }
+.admin-header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 22px; border-radius:12px; background: linear-gradient(90deg, rgba(7,9,25,0.6), rgba(14,16,30,0.6)); border:1px solid rgba(99,102,241,0.06); box-shadow: 0 24px 60px rgba(3,6,23,0.6); }
+.admin-header-left { display:flex; gap:14px; align-items:center; }
+.admin-logo { width:56px; height:56px; border-radius:10px; object-fit:cover; box-shadow: 0 10px 30px rgba(79,70,229,0.12); border:2px solid rgba(255,255,255,0.04); }
+.admin-title { font-size:20px; font-weight:800; color:#fff; margin:0; }
+.admin-subtitle { color: rgba(203,213,225,0.66); font-size:13px; }
+.admin-header-right { display:flex; gap:8px; align-items:center; }
+
+.admin-nav { display:flex; gap:8px; padding:10px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; border:1px solid rgba(255,255,255,0.03); }
+.admin-nav-btn { padding:10px 14px; border-radius:10px; font-weight:700; color: rgba(203,213,225,0.9); background:transparent; border:none; cursor:pointer; transition: transform .12s ease, box-shadow .12s ease, background .12s ease; }
+.admin-nav-btn:hover { transform: translateY(-2px); color: #fff; }
+.admin-nav-btn.active { background: linear-gradient(90deg,#6d57f4,#7b61ff); color:#fff; box-shadow: 0 14px 40px rgba(107,90,240,0.12); }
+
+.admin-card { margin-top:18px; padding:20px; border-radius:12px; background: linear-gradient(180deg, rgba(6,8,16,0.72), rgba(10,12,25,0.7)); border:1px solid rgba(99,102,241,0.04); box-shadow: 0 30px 80px rgba(2,6,23,0.64); color: #e6eefc; }
+.admin-card h2, .admin-card h3 { color: #fff; }
+.admin-card .panel-lg { background: transparent; border: 1px solid rgba(255,255,255,0.04); }
+.admin-card input, .admin-card select, .admin-card textarea { background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); color:#e6eefc; }
+.admin-card input::placeholder { color: rgba(203,213,225,0.28); }
+
+/* High priority: ensure all common text utilities inside admin-card are legible in dark theme.
+    Many template elements use utility classes like text-gray-900/text-gray-500 which become invisible
+    on a dark background. These overrides keep the original layout but force readable colors. */
+.admin-card .text-gray-900, .admin-card .text-gray-800, .admin-card .text-black { color: #e6eefc !important; }
+.admin-card .text-gray-700, .admin-card .text-gray-600 { color: #d1daf0 !important; }
+.admin-card .text-gray-500, .admin-card .text-gray-400, .admin-card .text-muted { color: rgba(203,213,225,0.72) !important; }
+.admin-card label, .admin-card th, .admin-card td, .admin-card p, .admin-card a, .admin-card span, .admin-card strong { color: inherit !important; }
+
+/* Inputs & placeholders explicitly readable */
+.admin-card input, .admin-card select, .admin-card textarea { color: #e6eefc !important; }
+.admin-card input::placeholder, .admin-card textarea::placeholder { color: rgba(203,213,225,0.36) !important; }
+
+/* Table header / cell defaults */
+.admin-card thead th { color: rgba(203,213,225,0.88) !important; }
+.admin-card tbody td { color: rgba(226,238,252,0.94) !important; }
+
+/* Make inline small action links (icons + text) clearly visible */
+.admin-card .inline-block, .admin-card .inline-flex, .admin-card .inline { color: inherit !important; }
+
+/* If any element used hard-coded white backgrounds earlier, preserve their shape but keep text color dark where required */
+.admin-card .bg-white { background-color: #ffffff !important; color: #111827 !important; }
+
+
+/* KPI small cards inside admin/client report */
+.admin-card .kpi-card { background: linear-gradient(90deg, rgba(107,90,240,0.08), rgba(91,33,182,0.04)); border: 1px solid rgba(107,90,240,0.06); border-radius:10px; }
+.admin-card .kpi-card p { margin:0 }
+
+/* Table dark styles inside admin */
+.admin-card table { color:#e6eefc; }
+.admin-card thead th { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color: rgba(203,213,225,0.9); border-bottom:1px solid rgba(255,255,255,0.03); }
+.admin-card tbody td { border-bottom:1px solid rgba(255,255,255,0.02); color: rgba(226,238,252,0.88); }
+.admin-card tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* Action buttons in admin cards */
+.admin-card .px-3 { background: rgba(255,255,255,0.02); color: rgba(203,213,225,0.9); border-radius:8px; padding:8px 10px; }
+.admin-card .px-3:hover { background: rgba(107,90,240,0.12); color:#fff; }
+
+/* Small responsive tweaks */
+@media (max-width:900px) {
+    .admin-header { flex-direction:column; align-items:flex-start; }
+    .admin-nav { width:100%; overflow:auto; }
+}
+
+/* ===== Force ALL admin text to black (user request) =====
+   Note: these rules intentionally use high specificity and !important to
+   override the dark-theme colors so text (including inputs/placeholders)
+   appears in black for maximum legibility as requested. */
+.admin-root, .admin-root * , .admin-card, .admin-card * , .client-root, .client-root * {
+    color: #000 !important;
+}
+
+/* Inputs/selects/textarea: text and placeholder must be black and readable */
+.admin-card input, .admin-card select, .admin-card textarea,
+.client-root input, .client-root select, .client-root textarea {
+    color: #000 !important;
+    background: #ffffff !important; /* keep inputs light so black text is readable */
+    border-color: rgba(0,0,0,0.12) !important;
+}
+.admin-card input::placeholder, .admin-card textarea::placeholder,
+.client-root input::placeholder, .client-root textarea::placeholder {
+    color: rgba(0,0,0,0.65) !important;
+}
+
+/* Tables, headers and cells should be black text */
+.admin-card thead th, .admin-card tbody td, .client-root thead th, .client-root tbody td {
+    color: #000 !important;
+}
+
+/* Links and buttons inside admin should show black text */
+.admin-card a, .admin-card .btn, .admin-card button, .client-root a, .client-root .btn, .client-root button {
+    color: #000 !important;
+}
+
+/* Ensure badges/status labels are readable (force dark text) */
+.admin-card .px-2.inline-flex, .admin-card .badge, .admin-card span[role='status'] { color: #000 !important; }
+
+/* If any element depended on bg-white to show their text color, keep their bg but ensure text is dark */
+.admin-card .bg-white, .client-root .bg-white { background-color: #ffffff !important; color: #000 !important; }
+
+
+/* Restore original light-action button colors inside admin lists
+   These target the utility color classes used in the templates (bg-indigo-50, bg-blue-50, bg-gray-50, bg-red-50)
+   so action buttons remain vivid and legible even when inside the dark .admin-card. */
+
+.admin-card .bg-indigo-50 { background-color: #eef2ff !important; color: #000 !important; }
+.admin-card .bg-indigo-50:hover { background-color: #e0e7ff !important; }
+.admin-card .bg-blue-50 { background-color: #eff6ff !important; color: #000 !important; }
+.admin-card .bg-blue-50:hover { background-color: #dbeafe !important; }
+.admin-card .bg-gray-50 { background-color: #ffffff !important; color: #000 !important; }
+.admin-card .bg-gray-50:hover { background-color: #f8fafc !important; }
+.admin-card .bg-red-50 { background-color: #fff1f2 !important; color: #000 !important; }
+.admin-card .bg-red-50:hover { background-color: #ffe4e6 !important; }
+
+/* Ensure the small inline action buttons keep their rounded look and padding and text is black */
+.admin-card .px-3.py-1 { padding:6px 10px; border-radius:8px; color: #000 !important; }
+
+/* Also ensure anchors/icons inside those buttons are black */
+.admin-card .bg-indigo-50 a, .admin-card .bg-blue-50 a, .admin-card .bg-gray-50 a, .admin-card .bg-red-50 a,
+.admin-card .bg-indigo-50 svg, .admin-card .bg-blue-50 svg, .admin-card .bg-gray-50 svg, .admin-card .bg-red-50 svg {
+    color: #000 !important; stroke: currentColor !important; fill: currentColor !important;
+}
+
+
+
 

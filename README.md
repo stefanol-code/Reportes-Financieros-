@@ -1,23 +1,16 @@
-# USM PRF — Registro del proyecto
+# Reportes-Financieros (PRF)
 
-Ubicación: C:\Users\OmarAdrian\Documents\development\workspace\Morna\usm\prf
-Inicio: 2025-10-31
+Proyecto front-end y funciones edge para gestionar clientes, proyectos y pagos, y
+generar enlaces temporales de acceso a dashboards de cliente.
 
-Este archivo centraliza cambios, bugs críticos y tareas por hacer del proyecto.
+Este README documenta la arquitectura, el modelo de base de datos, las edge
+functions y los pasos para desplegar y probar el flujo de link temporal.
 
-## Registro de Cambios
-
-Sigue el formato: Added, Changed, Fixed, Removed, Security.
-
-### [Unreleased] - 2025-10-31
-- Added:
-  - Archivo app.js con la lógica de la aplicación.
-  - Archivo styles.css con estilos y reglas de impresión.
-- Changed:
-  - index.html ahora enlaza assets externos y elimina CSS/JS embebido.
-- Fixed:
-- Removed:
-- Security:
+Contenido rápido
+- Estado: front + funciones edge incluidas
+- DB: scripts SQL en `sql/` (tablas: `clients`, `projects`, `payments`, `access_tokens`, `logs`, `admins`)
+- Edge Functions: `functions/generate-token` y `functions/get-client-data`
+- Front: `index.html`, `app.js`, `styles.css`
 
 ## Bugs críticos
 
@@ -59,7 +52,175 @@ Prueba rápida local (sin bundler): abre `index.html` en un navegador; el script
 
 ```powershell
 npm install @supabase/supabase-js
+
 ```
+
+## Resumen del proyecto (extendido)
+
+Este repositorio contiene una SPA ligera que permite:
+- Gestión administrativa (CRUD) de clientes, proyectos y pagos (mock o Supabase).
+- Generar enlaces temporales para que un cliente vea su dashboard (token en querystring).
+- Dos Edge Functions para crear tokens y validar/servir datos del cliente.
+
+Objetivo principal: permitir al administrador generar un enlace seguro que muestre
+el dashboard de un cliente sin requerir autenticación del cliente, con expiración
+por tiempo (24 horas) y opción de invalidación tras uso.
+
+---
+
+## Modelo de datos (ER) — resumen
+
+Entidades principales:
+- admins (opcional)
+- clients
+- projects
+- payments
+- access_tokens
+- logs
+
+Relaciones básicas:
+- clients 1 --- N projects
+- projects 1 --- N payments
+- clients 1 --- N access_tokens
+
+ER diagram (ASCII):
+
+  +---------+     1     +----------+     1     +---------+
+  | clients |-----------| projects |-----------| payments |
+  +---------+  (client) +----------+ (project) +---------+
+       |                          
+       | 1                       
+       +------------------+      
+                          |      
+                    +-------------+
+                    | access_tokens|
+                    +-------------+
+
+Tablas y campos clave
+
+- `clients` (id, name, email, created_at)
+- `projects` (id, client_id, name, status, budget, balance, created_at)
+- `payments` (id, project_id, date, amount, type, created_at)
+- `access_tokens` (token PK, client_id FK, expires_at, created_at)
+- `logs` (id, action, detail, created_at)
+- `admins` (email PK, password_hash, created_at)
+
+Los scripts SQL están en `sql/` y son idempotentes: `create_tables.sql`,
+`003_make_ids_serial.sql`, `002_tokens_and_logs.sql`.
+
+---
+
+## Edge Functions — Documentación detallada
+
+Los archivos están en `functions/`.
+
+1) `functions/generate-token/index.ts`
+
+- Descripción: genera un token alfanumérico (ej. `TKN-XXXXX`), lo inserta en la tabla
+  `access_tokens` con `expires_at = now() + 24h` y devuelve un link construído con
+  `PUBLIC_BASE_URL`.
+- Request: POST JSON { client_id: <integer> }
+- Response success: 200 JSON { success: true, token, link, expires_at }
+- Errores: 400 (client_id missing), 404 (client not found), 500 (insert error)
+- Security: la función usa `SUPABASE_SERVICE_ROLE` (secret). No exponerla al cliente.
+
+2) `functions/get-client-data/index.ts`
+
+- Descripción: valida un token recibido por query param o POST body, verifica
+  existencia y expiración en `access_tokens`, devuelve `client`, `projects` y
+  `payments` asociados.
+- Request: GET ?token=<token>  OR POST { token: '<token>' }
+- Response success: 200 JSON { success: true, data: { client, projects, payments } }
+- Errores: 400 (token missing), 404 (token not found), 403 (token expired), 500 (server error)
+- Nota: en el repo la función puede eliminar el token después del uso (single-use).
+
+Ejemplos
+
+Generate token (curl):
+
+```bash
+curl -X POST "${FUNCTIONS_BASE_URL}/generate-token" \
+  -H 'Content-Type: application/json' \
+  -d '{"client_id": 123}'
+```
+
+Get client data (curl):
+
+```bash
+curl "${FUNCTIONS_BASE_URL}/get-client-data?token=TKN-..."
+```
+
+---
+
+## Integración Frontend
+
+- `app.js` contiene funciones que consumen estas edge functions cuando
+  `window.FUNCTIONS_BASE_URL` está configurado. Si no está definido, el proyecto
+  usa un fallback en memoria (`MOCK_DATA`) para permitir desarrollo local sin
+  backend.
+- Funciones clave en `app.js`:
+  - `generateTokenLink(clientId)` → llama a `generate-token` y devuelve `link`.
+  - `viewClientReports(clientId)` → llama a `get-client-data` para mostrar dashboard.
+  - `initializeApp()` detecta `?token=` en la URL y carga la vista de cliente.
+
+---
+
+## Deployment y Setup (resumen)
+
+1. Ejecutar migraciones SQL en Supabase (SQL Editor o psql):
+   - `sql/create_tables.sql`
+   - `sql/003_make_ids_serial.sql`
+   - `sql/002_tokens_and_logs.sql`
+
+2. Desplegar Edge Functions con Supabase CLI:
+
+```powershell
+supabase login
+supabase link --project-ref <PROJECT_REF>
+supabase functions deploy generate-token --project-ref <PROJECT_REF>
+supabase functions deploy get-client-data --project-ref <PROJECT_REF>
+```
+
+3. Configurar secrets/variables en Supabase:
+
+```powershell
+supabase secrets set SUPABASE_SERVICE_ROLE="<service_role_key>" --project-ref <PROJECT_REF>
+supabase secrets set PUBLIC_BASE_URL="https://your-domain.com" --project-ref <PROJECT_REF>
+```
+
+4. Opcional: en el front, definir `window.FUNCTIONS_BASE_URL` con la URL base de tus funciones.
+
+---
+
+## Seguridad y recomendaciones
+
+- No exponer la `service_role` en el cliente.
+- Usa HTTPS para el `PUBLIC_BASE_URL`.
+- Considera el uso de single-use tokens o logging/auditing si los links se comparten.
+
+---
+
+## Desarrollo local
+
+- Puedes levantar un servidor simple para el front:
+
+```powershell
+python -m http.server 8000
+# abrir http://localhost:8000
+```
+
+El front usa un mock si `window.FUNCTIONS_BASE_URL` no está definido.
+
+---
+
+## Contribuciones
+
+- Issues y Pull Requests bienvenidos. Sigue la convención de commits (feat/fix/docs).
+
+---
+
+Fin del README.
+
 
 
 ## Convención de commits (sugerida)

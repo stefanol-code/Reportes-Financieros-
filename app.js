@@ -44,6 +44,75 @@ function isAdminUser(user) {
     return false;
 }
 
+/** RENDER: Recuperar contraseña (envío de enlace de reinicio) */
+function renderUserRecover() {
+    return `
+        <div class="auth-root">
+            <div class="auth-container">
+                <div class="auth-panel">
+                    <div class="auth-panels-wrapper">
+                        <div class="auth-left">
+                            <img src="morna.webp" alt="Morna" class="logo" />
+                            <h2>Recuperar acceso</h2>
+                            <p>Introduce el correo con el que te registraste y te enviaremos un enlace seguro para restablecer tu contraseña.</p>
+                        </div>
+                        <div class="auth-right">
+                            <div class="auth-card">
+                                <div class="auth-title">Recuperar contraseña</div>
+                                <div class="auth-sub">Te enviaremos un enlace a tu correo</div>
+                                <form onsubmit="event.preventDefault(); handlePasswordRecovery();">
+                                    <div class="form-field"><input id="recover-email" class="input" type="email" placeholder="Correo registrado" required /></div>
+                                    <div style="display:flex;gap:12px;margin-top:6px;">
+                                        <button type="submit" class="btn-primary-large">Enviar enlace</button>
+                                        <button type="button" onclick="setView('user-login')" class="btn btn-ghost">Volver</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/** Maneja el envío de recuperación de contraseña usando Supabase si está disponible */
+async function handlePasswordRecovery() {
+    const emailEl = document.getElementById('recover-email');
+    if (!emailEl) return showMessage('Error', 'No se encontró el campo de correo.');
+    const email = String(emailEl.value || '').trim();
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!re.test(email.toLowerCase())) return showMessage('Error', 'Ingrese un correo válido.');
+
+    // Intentar usar Supabase si está presente
+    if (window.supabase && window.supabase.auth) {
+        try {
+            // v2: resetPasswordForEmail may exist
+            if (typeof window.supabase.auth.resetPasswordForEmail === 'function') {
+                await window.supabase.auth.resetPasswordForEmail(email);
+                showMessage('Revisa tu correo', 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.');
+                setView('user-login');
+                return;
+            }
+            // v1: via auth.api
+            if (window.supabase.auth.api && typeof window.supabase.auth.api.resetPasswordForEmail === 'function') {
+                await window.supabase.auth.api.resetPasswordForEmail(email);
+                showMessage('Revisa tu correo', 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.');
+                setView('user-login');
+                return;
+            }
+        } catch (err) {
+            console.warn('handlePasswordRecovery:', err);
+            showMessage('Error', 'No fue posible enviar el enlace. Intenta más tarde.');
+            return;
+        }
+    }
+
+    // Fallback: simulación en entorno sin Supabase
+    showMessage('Simulado', 'Se ha simulado el envío de un enlace de restablecimiento (entorno de desarrollo).');
+    setView('user-login');
+}
+
 // --- ESTADO DE LA APLICACIÓN ---
 const state = {
     currentView: 'login', // 'login', 'admin', 'client'
@@ -690,15 +759,34 @@ function printReport() {
 
 /** RENDER: Vista de Login */
 function renderLogin() {
-    // Vista principal: login admin + enlaces a vistas separadas para usuario (login / register)
+    // Nueva vista principal: diseño llamativo tipo Morna (solo front-end)
     return `
-        <div class="flex items-center justify-center min-h-[80vh] print-area">
-            <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-extrabold text-gray-900 mb-4">Acceso de Usuario</h2>
-                <p class="text-sm text-gray-500 mb-4">Inicia sesión o regístrate con tu cuenta (Supabase).</p>
-                <div class="space-y-3 mt-6">
-                    <button onclick="setView('user-login')" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-indigo-700">Login de Usuario</button>
-                    <button onclick="setView('user-register')" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700">Registro de Usuario</button>
+        <div class="auth-root">
+            <div class="auth-container">
+                <div class="auth-panel">
+                    <div class="auth-panels-wrapper">
+                        <div class="auth-left">
+                            <img src="morna.webp" alt="Morna" class="logo" />
+                            <h2>Bienvenido a Morna</h2>
+                            <p>Accede a tus reportes financieros de forma segura y clara. Gestiona clientes, proyectos y pagos con un solo clic.</p>
+                        </div>
+
+                        <div class="auth-right">
+                            <div class="auth-card">
+                                <div class="auth-title">Acceso de Usuario</div>
+                                <div class="auth-sub">Inicia sesión con tu correo y contraseña</div>
+
+                                <div class="space-y-4" style="margin-bottom:12px;">
+                                    <button onclick="setView('user-login')" class="btn-primary-large">Iniciar sesión</button>
+                                    <button onclick="setView('user-register')" class="btn-primary-large" style="background: linear-gradient(90deg,#06b6d4,#4f46e5);">Crear cuenta</button>
+                                </div>
+
+                                <div class="muted-center" style="font-size:13px;color:var(--muted);">
+                                    <button onclick="setView('user-login')" class="link-button">¿Olvidaste tu contraseña?</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -708,18 +796,37 @@ function renderLogin() {
 /** RENDER: Vista de Login de Usuario (Supabase) */
 function renderUserLogin() {
     return `
-        <div class="flex items-center justify-center min-h-[80vh]">
-            <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-bold mb-4">Iniciar sesión (Usuario)</h2>
-                <p class="text-sm text-gray-500 mb-4">Ingrese sus credenciales para acceder.</p>
-                <form onsubmit="event.preventDefault(); handleUserSignIn();">
-                    <input id="user-signin-email" type="email" placeholder="Email" class="w-full p-3 border rounded-lg mb-3" required />
-                    <input id="user-signin-password" type="password" placeholder="Contraseña" class="w-full p-3 border rounded-lg mb-4" required />
-                    <div class="flex gap-3">
-                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg">Entrar</button>
-                        <button type="button" onclick="setView('login')" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg">Volver</button>
+        <div class="auth-root">
+            <div class="auth-container">
+                <div class="auth-panel">
+                    <div class="auth-panels-wrapper">
+                        <div class="auth-left">
+                            <img src="morna.webp" alt="Morna" class="logo" />
+                            <h2>Bienvenido de nuevo</h2>
+                            <p>Introduce tus credenciales para acceder a tu cuenta.</p>
+                        </div>
+                        <div class="auth-right">
+                            <div class="auth-card">
+                                <div class="auth-title">Iniciar sesión</div>
+                                <div class="auth-sub">Usa tu correo y contraseña</div>
+                                <form onsubmit="event.preventDefault(); handleUserSignIn();">
+                                    <div class="form-field">
+                                        <input id="user-signin-email" class="input" type="email" placeholder="Correo electrónico" required />
+                                    </div>
+                                    <div class="form-field">
+                                        <input id="user-signin-password" class="input" type="password" placeholder="Contraseña" required />
+                                        <button type="button" class="input-icon link-button" onclick="togglePasswordVisibility('user-signin-password')">👁️</button>
+                                    </div>
+                                    <div style="display:flex;gap:12px;margin-top:6px;">
+                                        <button type="submit" class="btn-primary-large">Entrar</button>
+                                        <button type="button" onclick="setView('login')" class="btn btn-ghost" style="align-self:center;">Volver</button>
+                                    </div>
+                                    <div class="muted-center"><button type="button" onclick="setView('user-recover')" class="link-button">¿Olvidaste tu contraseña?</button></div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     `;
@@ -728,21 +835,44 @@ function renderUserLogin() {
 /** RENDER: Vista de Registro de Usuario (Supabase) */
 function renderUserRegister() {
     return `
-        <div class="flex items-center justify-center min-h-[80vh]">
-            <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-bold mb-4">Registro de Usuario</h2>
-                <p class="text-sm text-gray-500 mb-4">Crea una cuenta nueva con tu email y contraseña.</p>
-                <form onsubmit="event.preventDefault(); handleUserSignUp();">
-                    <input id="user-signup-email" type="email" placeholder="Email" class="w-full p-3 border rounded-lg mb-3" required />
-                    <input id="user-signup-password" type="password" placeholder="Contraseña" class="w-full p-3 border rounded-lg mb-4" required />
-                    <div class="flex gap-3">
-                        <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-lg">Crear Cuenta</button>
-                        <button type="button" onclick="setView('login')" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg">Volver</button>
+        <div class="auth-root">
+            <div class="auth-container">
+                <div class="auth-panel">
+                    <div class="auth-panels-wrapper">
+                        <div class="auth-left">
+                            <img src="morna.webp" alt="Morna" class="logo" />
+                            <h2>Únete a Morna</h2>
+                            <p>Crea tu cuenta y comienza a gestionar tus reportes.</p>
+                        </div>
+                        <div class="auth-right">
+                            <div class="auth-card">
+                                <div class="auth-title">Crear cuenta</div>
+                                <div class="auth-sub">Regístrate con tu correo</div>
+                                <form onsubmit="event.preventDefault(); handleUserSignUp();">
+                                        <div class="form-field"><input id="user-signup-email" class="input" type="email" placeholder="Correo electrónico" required /></div>
+                                        <div class="form-field">
+                                        <input id="user-signup-password" class="input" type="password" placeholder="Contraseña (mín. 8 caracteres)" required />
+                                        <button type="button" class="input-icon link-button" onclick="togglePasswordVisibility('user-signup-password')">👁️</button>
+                                    </div>
+                                    <div style="display:flex;gap:12px;margin-top:6px;">
+                                        <button type="submit" class="btn-primary-large">Crear Cuenta</button>
+                                        <button type="button" onclick="setView('login')" class="btn btn-ghost">Volver</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     `;
+}
+
+/* Helper: toggle visibility of password inputs by id */
+function togglePasswordVisibility(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.type = el.type === 'password' ? 'text' : 'password';
 }
 
 /** RENDER: Panel simple para usuario autenticado (Supabase) */
@@ -778,7 +908,7 @@ function renderClientDashboard(data) {
     const progress = totalBudget > 0 ? ((totalPaid / totalBudget) * 100).toFixed(0) : 0;
 
     return `
-        <div class="max-w-6xl mx-auto print-area">
+        <div class="client-root max-w-6xl mx-auto print-area">
             <header class="flex justify-between items-center mb-8 no-print">
                 <h1 class="text-3xl font-extrabold text-gray-900">
                     Dashboard de Cliente
@@ -795,7 +925,7 @@ function renderClientDashboard(data) {
                 </div>
             </header>
 
-            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+            <div class="admin-card">
                 <!-- ENCABEZADO PARA IMPRESIÓN -->
                 <div class="print-only mb-6">
                     <h1 class="text-2xl font-bold mb-1">Reporte Financiero: ${client.name}</h1>
@@ -809,21 +939,21 @@ function renderClientDashboard(data) {
 
                 <!-- Indicadores Clave -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p class="text-sm font-medium text-gray-500">Total Presupuestado</p>
-                        <p class="text-2xl font-semibold text-gray-900">${formatCurrency(totalBudget)}</p>
+                    <div class="p-4 kpi-card">
+                        <p class="text-sm font-medium text-gray-300">Total Presupuestado</p>
+                        <p class="text-2xl font-semibold text-white">${formatCurrency(totalBudget)}</p>
                     </div>
-                    <div class="p-4 bg-green-50 rounded-lg border border-green-200">
-                        <p class="text-sm font-medium text-gray-500">Total Pagado</p>
-                        <p class="text-2xl font-semibold text-green-600">${formatCurrency(totalPaid)}</p>
+                    <div class="p-4 kpi-card">
+                        <p class="text-sm font-medium text-gray-300">Total Pagado</p>
+                        <p class="text-2xl font-semibold text-white">${formatCurrency(totalPaid)}</p>
                     </div>
-                    <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                        <p class="text-sm font-medium text-gray-500">Total Pendiente</p>
-                        <p class="text-2xl font-semibold text-red-600">${formatCurrency(totalPending)}</p>
+                    <div class="p-4 kpi-card">
+                        <p class="text-sm font-medium text-gray-300">Total Pendiente</p>
+                        <p class="text-2xl font-semibold text-white">${formatCurrency(totalPending)}</p>
                     </div>
-                    <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <p class="text-sm font-medium text-gray-500">Proyectos Activos</p>
-                        <p class="text-2xl font-semibold text-gray-900">${activeProjectsCount} de ${totalProjectCount}</p>
+                    <div class="p-4 kpi-card">
+                        <p class="text-sm font-medium text-gray-300">Proyectos Activos</p>
+                        <p class="text-2xl font-semibold text-white">${activeProjectsCount} de ${totalProjectCount}</p>
                     </div>
                 </div>
 
@@ -838,8 +968,8 @@ function renderClientDashboard(data) {
                 <!-- Proyectos -->
                 <h3 class="text-xl font-bold mb-4 text-gray-700">Proyectos Actuales e Históricos</h3>
                 <div class="overflow-x-auto mb-8">
-                    <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y rounded-lg overflow-hidden">
+                        <thead>
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proyecto</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presupuesto</th>
@@ -848,7 +978,7 @@ function renderClientDashboard(data) {
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="divide-y">
                             ${projects.map(p => {
                                 const paid = MOCK_DATA.payments.filter(pay => pay.projectId === p.id).reduce((sum, pay) => sum + pay.amount, 0);
                                 const statusColor = p.status === 'Activo' ? 'text-green-600 bg-green-100' : 'text-gray-600 bg-gray-100';
@@ -873,8 +1003,8 @@ function renderClientDashboard(data) {
                 <!-- Historial de Pagos -->
                 <h3 class="text-xl font-bold mb-4 text-gray-700">Historial de Pagos</h3>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y rounded-lg overflow-hidden">
+                        <thead>
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proyecto</th>
@@ -882,7 +1012,7 @@ function renderClientDashboard(data) {
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="divide-y">
                             ${payments.map(p => {
                                 const project = projects.find(proj => proj.id === p.projectId) || { name: 'N/A' };
                                 return `
@@ -926,23 +1056,28 @@ function renderAdminDashboard() {
     };
 
     return `
-        <div class="max-w-7xl mx-auto print-area">
-            <header class="flex flex-col sm:flex-row justify-between items-center mb-8 pb-4 border-b border-gray-300 no-print">
-                <h1 class="text-3xl font-extrabold text-gray-900 mb-4 sm:mb-0">
-                    Panel Administrativo <span class="text-sm font-normal text-gray-500">(Supabase CRUD Mock)</span>
-                </h1>
-                <button onclick="handleAdminLogout()" class="btn btn-danger">Cerrar Sesión</button>
+        <div class="admin-root print-area">
+            <header class="admin-header no-print">
+                <div class="admin-header-left">
+                    <img src="morna.webp" alt="Morna" class="admin-logo" />
+                    <div>
+                        <h1 class="admin-title">Panel Administrativo</h1>
+                    </div>
+                </div>
+                <div class="admin-header-right">
+                    <button onclick="handleAdminLogout()" class="btn btn-danger">Cerrar Sesión</button>
+                </div>
             </header>
 
             <!-- Navegación de Sub-vistas -->
-            <div class="no-print mb-8">
-                <nav class="flex space-x-1 p-1 bg-white rounded-xl shadow-inner border border-gray-200">
+            <div class="no-print mb-6">
+                <nav class="admin-nav">
                     ${['clients', 'projects', 'payments', 'logs'].map(view => {
                         const title = { 'clients': 'Clientes', 'projects': 'Proyectos', 'payments': 'Pagos', 'logs': 'Auditoría (Logs)' }[view];
                         const isActive = state.adminSubView === view;
                         return `
                             <button onclick="state.adminSubView='${view}'; renderApp();"
-                                    class="flex-1 py-2 px-4 text-sm font-medium rounded-lg transition ${isActive ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'}">
+                                    class="admin-nav-btn ${isActive ? 'active' : ''}">
                                 ${title}
                             </button>
                         `;
@@ -951,7 +1086,7 @@ function renderAdminDashboard() {
             </div>
 
             <!-- Contenido de Sub-vista -->
-            <div id="admin-sub-content" class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <div id="admin-sub-content" class="admin-card">
                 ${renderSubView()}
             </div>
         </div>
@@ -1146,7 +1281,6 @@ function renderAdminPayments(projectOptions, projects, payments) {
 function renderAdminLogs() {
     return `
         <h2 class="text-2xl font-bold mb-6 text-gray-800">Logs de Auditoría</h2>
-        <p class="text-sm text-gray-500 mb-4">Registro de todas las acciones administrativas y de acceso (Simulación de la tabla 'logs').</p>
         <div class="space-y-3 max-h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg border">
             ${MOCK_DATA.logs.map(log => `
                 <div class="p-3 bg-white rounded-lg shadow-sm border border-gray-100 text-sm flex justify-between items-start">
@@ -1177,6 +1311,8 @@ function renderApp() {
         appDiv.innerHTML = renderUserLogin();
     } else if (state.currentView === 'user-register') {
         appDiv.innerHTML = renderUserRegister();
+    } else if (state.currentView === 'user-recover') {
+        appDiv.innerHTML = renderUserRecover();
     } else if (state.currentView === 'client' && state.clientData) {
         appDiv.innerHTML = renderClientDashboard(state.clientData);
     } else {
